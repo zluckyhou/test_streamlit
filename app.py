@@ -105,6 +105,7 @@ if user_message and upload_and_display():
         st.write('A message uploaded')
         st.session_state['message_sent'] = True
     if st.session_state['message_sent']:
-        upload_and_display()
+        with uploader.container():
+            upload_and_display()
 
         
