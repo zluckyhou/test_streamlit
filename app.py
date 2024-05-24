@@ -54,26 +54,45 @@ uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'p
 # 主页面的chat input组件
 user_message = st.text_input("发送消息", key="chat_input")
 
-# 当用户发送消息的时候
-if user_message:
-    if uploaded_file is not None:
-        image_data = uploaded_file.getvalue()
-        st.session_state['uploaded_image'] = image_data
-        # 有新图片上传时重置消息发送状态
-        st.session_state['message_sent'] = False
-    # 显示用户的消息
-    st.write(f"用户: {user_message}")
+# # 当用户发送消息的时候
+# if user_message:
+#     if uploaded_file is not None:
+#         image_data = uploaded_file.getvalue()
+#         st.session_state['uploaded_image'] = image_data
+#         # 有新图片上传时重置消息发送状态
+#         st.session_state['message_sent'] = False
+#     # 显示用户的消息
+#     st.write(f"用户: {user_message}")
 
-    # 如果这是用户上传图片后的第一次消息，并且有图片被上传
-    if not st.session_state['message_sent'] and st.session_state['uploaded_image'] is not None:
-        # 使用Pillow库来打开图片
-        img = Image.open(io.BytesIO(st.session_state['uploaded_image']))
-        st.image(img, caption='上传的图片', use_column_width=True)
+#     # 如果这是用户上传图片后的第一次消息，并且有图片被上传
+#     if not st.session_state['message_sent'] and st.session_state['uploaded_image'] is not None:
+#         # 使用Pillow库来打开图片
+#         img = Image.open(io.BytesIO(st.session_state['uploaded_image']))
+#         st.image(img, caption='上传的图片', use_column_width=True)
         
-        # 标记消息已经发送，下次发送时不再附加图片
-        st.session_state['message_sent'] = True
-        # 以便下次发送消息时不再附带图片
-        st.session_state['uploaded_image'] = None
+#         # 标记消息已经发送，下次发送时不再附加图片
+#         st.session_state['message_sent'] = True
+#         # 以便下次发送消息时不再附带图片
+#         st.session_state['uploaded_image'] = None
 
+import streamlit as st
 
+# 初始化 session_state
+if "uploaded_file" not in st.session_state:
+    st.session_state.uploaded_file = None
+
+# 上传文件
+uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"])
+
+# 更新 session_state
+if uploaded_file is not None:
+    st.session_state.uploaded_file = uploaded_file
+
+# 显示上传的文件
+if st.session_state.uploaded_file is not None:
+    st.image(st.session_state.uploaded_file)
+
+# 清空按钮
+if st.button("Clear"):
+    st.session_state.uploaded_file = None
 
