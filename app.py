@@ -19,3 +19,11 @@ logger.error("这是一个错误日志")
 # Streamlit 应用界面
 st.title("日志记录测试")
 st.write("检查 Streamlit Cloud 的日志文件以查看记录的日志。")
+
+
+prompt = st.chat_input("What is up?")
+
+# React to user input
+if prompt:
+	# Display user message in chat message container
+	logger.info(f"user prompt log: {prompt}")
