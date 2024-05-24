@@ -73,4 +73,5 @@ if user_message:
         st.session_state['message_sent'] = True
         # 以便下次发送消息时不再附带图片
         st.session_state['uploaded_image'] = None
+        uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
 
