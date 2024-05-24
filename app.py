@@ -95,4 +95,4 @@ if st.button("Clear"):
 # 如果需要重置,则重新创建文件上传组件
 if reset_uploader:
     reset_uploader = False
-    uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
