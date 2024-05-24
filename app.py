@@ -77,22 +77,18 @@
 
 import streamlit as st
 
+# 创建一个可更新的容器
+uploader = st.empty()
+
 # 初始化文件上传器
-uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
 
 # 显示上传的文件
 if uploaded_file is not None:
     st.image(uploaded_file)
 
-# 用于重置文件上传组件状态的标志
-reset_uploader = False
-
 # 清空按钮
 if st.button("Clear"):
-    reset_uploader = True
-    uploaded_file = None
-
-# 如果需要重置,则重新创建文件上传组件
-if reset_uploader:
-    reset_uploader = False
-    uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
+    # 重新渲染容器,清空文件上传组件
+    uploader.empty()
+    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
