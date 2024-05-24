@@ -24,6 +24,7 @@ if message:
     
     # 发送图片后，将上传的图片从 session state 中移除
     st.session_state.uploaded_image = None
+    uploaded_file = None
 
     # 显示回复消息
     st.chat_message("assistant").write("这是你的回复消息。")
