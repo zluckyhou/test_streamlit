@@ -7,6 +7,11 @@ if 'uploaded_image' not in st.session_state:
 if 'image_sent' not in st.session_state:
     st.session_state.image_sent = False
 
+
+
+# 右侧 Chat 输入组件
+message = st.chat_input("发送消息")
+
 # 侧边栏文件上传组件
 uploaded_file = st.sidebar.file_uploader("上传图片", type=["jpg", "png", "jpeg"])
 
@@ -14,9 +19,6 @@ uploaded_file = st.sidebar.file_uploader("上传图片", type=["jpg", "png", "jp
 if uploaded_file is not None:
     st.session_state.uploaded_image = uploaded_file
     st.session_state.image_sent = False
-
-# 右侧 Chat 输入组件
-message = st.chat_input("发送消息")
 
 if message:
     # 显示聊天消息
