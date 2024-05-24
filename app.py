@@ -49,17 +49,18 @@ if 'message_sent' not in st.session_state:
 
 # 侧边栏的文件上传组件
 uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
-if uploaded_file is not None:
-    image_data = uploaded_file.getvalue()
-    st.session_state['uploaded_image'] = image_data
-    # 有新图片上传时重置消息发送状态
-    st.session_state['message_sent'] = False
+
 
 # 主页面的chat input组件
 user_message = st.text_input("发送消息", key="chat_input")
 
 # 当用户发送消息的时候
 if user_message:
+    if uploaded_file is not None:
+        image_data = uploaded_file.getvalue()
+        st.session_state['uploaded_image'] = image_data
+        # 有新图片上传时重置消息发送状态
+        st.session_state['message_sent'] = False
     # 显示用户的消息
     st.write(f"用户: {user_message}")
 
@@ -73,5 +74,6 @@ if user_message:
         st.session_state['message_sent'] = True
         # 以便下次发送消息时不再附带图片
         st.session_state['uploaded_image'] = None
-        uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
+
+
 
