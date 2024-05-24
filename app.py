@@ -81,14 +81,17 @@ import streamlit as st
 uploader = st.empty()
 
 # 初始化文件上传器
-uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
 
-# 显示上传的文件
-if uploaded_file is not None:
-    st.image(uploaded_file)
+def upload_and_display():
+    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    
+    # 显示上传的文件
+    if uploaded_file is not None:
+        st.image(uploaded_file)
 
 # 清空按钮
 if st.button("Clear"):
     # 重新渲染容器,清空文件上传组件
-    uploader.empty()
-    # uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    with uploader.container():
+        upload_and_display()
+
