@@ -90,5 +90,6 @@ if uploaded_file is not None:
 # 清空按钮
 if st.button("Clear"):
     # 重新渲染容器,清空文件上传组件
+    uploaded_file = None
     uploader.empty()
-    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
