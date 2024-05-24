@@ -77,10 +77,12 @@
 
 import streamlit as st
 
-# 创建一个可更新的容器
-uploader = st.empty()
 
-# 初始化文件上传器
+
+# 初始化一个状态，当消息发送后变为True
+if 'message_sent' not in st.session_state:
+    st.session_state['message_sent'] = False
+
 
 def upload_and_display():
     uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
@@ -88,10 +90,21 @@ def upload_and_display():
     # 显示上传的文件
     if uploaded_file is not None:
         st.image(uploaded_file)
+        image = True
+        return image
 
-# 清空按钮
-if st.button("Clear"):
-    # 重新渲染容器,清空文件上传组件
-    with uploader.container():
+# 创建一个可更新的容器
+uploader = st.empty()
+upload_and_display()
+
+user_message = st.chat_input('input a message')
+
+if user_message and upload_and_display():
+    with st.chat_message('user'):
+        st.write(user_message)
+        st.write('A message uploaded')
+        st.session_state['message_sent'] = True
+    if st.session_state['message_sent']:
         upload_and_display()
 
+        
