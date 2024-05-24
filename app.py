@@ -85,7 +85,7 @@ if 'message_sent' not in st.session_state:
 
 
 def upload_and_display():
-    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
     
     # 显示上传的文件
     if uploaded_file is not None:
