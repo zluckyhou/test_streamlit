@@ -1,119 +1,28 @@
 import streamlit as st
-import numpy as np
-import random
-import time
-from PIL import Image
-import os
-import mimetypes
-from supabase import create_client, Client, StorageException
-from io import StringIO, BytesIO
-from tempfile import NamedTemporaryFile
-import json
-import requests
+import logging
 
+# 创建一个列表来存储日志消息
+log_messages = []
 
-# check if image
-def is_image(file_path):
-	try:
-		Image.open(file_path)
-		return True
-	except IOError:
-		return False
+class StreamlitHandler(logging.Handler):
+    def emit(self, record):
+        log_messages.append(self.format(record))
 
-def get_supabase_client():
-	url = st.secrets['supabase_url']
-	key = st.secrets['supabase_key']
-	supabase = create_client(url, key)
-	return supabase
+# 创建一个 Streamlit 日志记录器
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+st_handler = StreamlitHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+st_handler.setFormatter(formatter)
+logger.addHandler(st_handler)
 
-# insert data to database
-def supabase_insert_message(user_message,response_content,messages,content_type,service_channel):
-    supabase = get_supabase_client()
-    data, count = supabase.table('messages').insert({"user_message": user_message, "response_content": response_content,"messages":messages,"content_type":content_type,"service_channel":service_channel}).execute()
+# 在需要的地方记录日志
+logger.info("这是一个信息日志")
+logger.warning("这是一个警告日志")
+logger.error("这是一个错误日志")
 
-def supabase_insert_user(name,user_name,profile,picture,oauth_token):
-    supabase = get_supabase_client()
-    data, count = supabase.table('users').insert({"name":name,"user_name":user_name,"profile":profile,"picture":picture,"oauth_token":oauth_token}).execute()
+prompt = st.chat_input("hello")
+logger.info(f"this is user prompt: {prompt}")
 
-
-def supabase_fetch_user(user_name):
-    supabase = get_supabase_client()
-    data,count = supabase.table('users').select("*").eq('user_name',user_name).execute()
-    return data
-        
-
-# check if file already exists
-def check_supabase_file_exists(file_path):
-	supabase = get_supabase_client()
-	bucket_name = st.secrets["bucket_name"]
-	supabase_storage_ls = supabase.storage.from_(bucket_name).list()
-	
-	if any(file["name"] == os.path.basename(file_path) for file in supabase_storage_ls):
-		return True
-	else:
-		return False
-
-
-def upload_file_to_supabase_storage(file_obj):
-	base_name = os.path.basename(file_obj.name)
-	path_on_supastorage = os.path.splitext(base_name)[0] + '_' + str(round(time.time())//6000)  + os.path.splitext(base_name)[1]
-	mime_type, _ = mimetypes.guess_type(file_obj.name)
-	
-	supabase = get_supabase_client()
-	bucket_name = st.secrets["bucket_name"]
-	
-	bytes_data = file_obj.getvalue()
-	with NamedTemporaryFile(delete=False) as temp_file:
-		temp_file.write(bytes_data)
-		temp_file_path = temp_file.name
-	
-	try:
-		with open(temp_file_path, "rb") as f:
-			if check_supabase_file_exists(path_on_supastorage):
-				public_url = supabase.storage.from_(bucket_name).get_public_url(path_on_supastorage)
-			else:
-				supabase.storage.from_(bucket_name).upload(file=temp_file_path, path=path_on_supastorage, file_options={"content-type": mime_type})
-				public_url = supabase.storage.from_(bucket_name).get_public_url(path_on_supastorage)
-	except StorageException as e:
-		print("StorageException:", e)
-		raise
-	finally:
-		os.remove(temp_file_path)  # Ensure the temporary file is removed
-	
-	return public_url
-
-
-
-# Initialize file uploader
-if 'uploaded_file' not in st.session_state:
-	st.session_state.uploaded_file = None
-
-# upload file
-with st.sidebar:
-	# file uploader
-	st.markdown("**Upload image to your chat.**")
-	file_uploader_key = str(st.session_state.get('file_uploader_key', ''))
-	uploaded_file = st.file_uploader("Upload File", key=file_uploader_key)
-	if uploaded_file is not None:
-		# display filename
-		# st.write("Filename:", uploaded_file.name)
-		st.session_state.uploaded_file = uploaded_file
-		if uploaded_file.type.startswith("image/"):
-			st.image(uploaded_file)
-		st.session_state['file_uploader_key'] = st.session_state.get('file_uploader_key', '') + 'new'
-
-
-prompt = st.chat_input("What is up?")
-
-# React to user input
-if prompt:
-	# Display user message in chat message container
-	with st.chat_message("user"):
-		st.markdown(prompt)
-	# if uploaded image, display in message list and remove from sidebar
-	if st.session_state.uploaded_file and st.session_state.uploaded_file.type.startswith("image/"):
-		public_url = upload_file_to_supabase_storage(st.session_state.uploaded_file)
-		st.image(public_url)
-		st.session_state.uploaded_file = None
-
-
+# 在 Streamlit 应用中显示日志
+st.text_area("日志", "\n".join(log_messages), height=400)
