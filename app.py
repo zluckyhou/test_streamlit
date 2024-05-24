@@ -97,17 +97,20 @@ if uploaded_file is not None:
 
 user_message = st.chat_input('input a message')
 
-if user_message and st.session_state['uploaded_image']:
+if user_message:
     with st.chat_message('user'):
         st.write(user_message)
-        st.image(st.session_state['uploaded_image'])
-        st.session_state['message_sent'] = True
-    if st.session_state['message_sent']:
-        with uploader.container():
-            st.session_state['uploaded_image'] = None
-            uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"],key='reset_uploader')
-            if uploaded_file is not None:
-                # st.image(uploaded_file)
-                st.session_state['uploaded_image'] = uploaded_file
+        if st.session_state['uploaded_image']:
+            st.image(st.session_state['uploaded_image'])
+            st.session_state['message_sent'] = True
+            
+if st.session_state['message_sent']:
+    with uploader.container():
+        st.session_state['uploaded_image'] = None
+        uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"],key='reset_uploader')
+        if uploaded_file is not None:
+            # st.image(uploaded_file)
+            st.session_state['uploaded_image'] = uploaded_file
+            st.session_state['message_sent'] = False
 
         
