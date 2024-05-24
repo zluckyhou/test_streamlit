@@ -5,11 +5,13 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-# 创建一个控制台日志处理器
-console_handler = logging.StreamHandler()
-console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
-logger.addHandler(console_handler)
+# 检查是否已经有处理器，避免重复添加
+if not logger.handlers:
+	# 创建一个控制台日志处理器
+	console_handler = logging.StreamHandler()
+	console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	console_handler.setFormatter(console_formatter)
+	logger.addHandler(console_handler)
 
 # 记录一些日志
 logger.info("这是一个信息日志")
