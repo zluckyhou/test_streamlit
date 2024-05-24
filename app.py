@@ -91,7 +91,7 @@ if 'message_sent' not in st.session_state:
 uploader = st.empty()
 uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
 if uploaded_file is not None:
-    st.image(uploaded_file)
+    # st.image(uploaded_file)
     st.session_state['uploaded_image'] = uploaded_file
 
 
@@ -102,8 +102,9 @@ if user_message and st.session_state['uploaded_image']:
         st.write(user_message)
         st.image(st.session_state['uploaded_image'])
         st.session_state['message_sent'] = True
+        st.session_state['uploaded_image'] = None
     if st.session_state['message_sent']:
         with uploader.container():
-            uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
+            uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"],key='reset_uploader')
 
         
