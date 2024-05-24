@@ -78,34 +78,32 @@
 import streamlit as st
 
 
+# 初始化一个状态用于存储上传的图片
+if 'uploaded_image' not in st.session_state:
+    st.session_state['uploaded_image'] = None
 
 # 初始化一个状态，当消息发送后变为True
 if 'message_sent' not in st.session_state:
     st.session_state['message_sent'] = False
 
 
-def upload_and_display():
-    uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
-    
-    # 显示上传的文件
-    if uploaded_file is not None:
-        st.image(uploaded_file)
-        image = True
-        return image
-
 # 创建一个可更新的容器
 uploader = st.empty()
-upload_and_display()
+uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
+if uploaded_file is not None:
+    st.image(uploaded_file)
+    st.session_state['uploaded_image'] = uploaded_file
+
 
 user_message = st.chat_input('input a message')
 
-if user_message and upload_and_display():
+if user_message and st.session_state['uploaded_image']:
     with st.chat_message('user'):
         st.write(user_message)
-        st.write('A message uploaded')
+        st.image(st.session_state['uploaded_image'])
         st.session_state['message_sent'] = True
     if st.session_state['message_sent']:
         with uploader.container():
-            upload_and_display()
+            uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
 
         
