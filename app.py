@@ -77,19 +77,22 @@
 
 import streamlit as st
 
-# 创建一个上下文管理器,用于重置组件状态
-@st.cache_data
-def make_file_uploader():
-    return st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
-
 # 初始化文件上传器
-uploaded_file = make_file_uploader()
+uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
 
 # 显示上传的文件
 if uploaded_file is not None:
     st.image(uploaded_file)
 
+# 用于重置文件上传组件状态的标志
+reset_uploader = False
+
 # 清空按钮
 if st.button("Clear"):
-    # 重新创建上下文管理器,清空组件状态
-    uploaded_file = make_file_uploader()
+    reset_uploader = True
+    uploaded_file = None
+
+# 如果需要重置,则重新创建文件上传组件
+if reset_uploader:
+    reset_uploader = False
+    uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
