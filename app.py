@@ -1,147 +1,136 @@
-# import streamlit as st
-
-# # 用于存储上传的图片
-# if 'uploaded_image' not in st.session_state:
-#     st.session_state.uploaded_image = None
-    
-# if 'image_sent' not in st.session_state:
-#     st.session_state.image_sent = False
-
-
-
-# # 右侧 Chat 输入组件
-# message = st.chat_input("发送消息")
-
-# # 侧边栏文件上传组件
-# uploaded_file = st.sidebar.file_uploader("上传图片", type=["jpg", "png", "jpeg"])
-
-# # 如果有文件上传，则保存到 session state
-# if uploaded_file is not None:
-#     st.session_state.uploaded_image = uploaded_file
-#     st.session_state.image_sent = False
-
-# if message:
-#     # 显示聊天消息
-#     with st.chat_message("user"):
-#         st.write(message)
-#         # 如果有上传的图片，并且这是第一次发送消息，显示图片
-#         if st.session_state.uploaded_image is not None and not st.session_state.image_sent:
-#             st.image(st.session_state.uploaded_image)
-#             st.session_state.image_sent = True
-#             st.session_state.uploaded_image = None
-    
-
-#     # 显示回复消息
-#     st.chat_message("assistant").write("这是你的回复消息。")
-
-
-# import streamlit as st
-# from PIL import Image
-# import io
-
-# # 初始化一个状态用于存储上传的图片
-# if 'uploaded_image' not in st.session_state:
-#     st.session_state['uploaded_image'] = None
-
-# # 初始化一个状态，当消息发送后变为True
-# if 'message_sent' not in st.session_state:
-#     st.session_state['message_sent'] = False
-
-# # 侧边栏的文件上传组件
-# uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
-
-
-# # 主页面的chat input组件
-# user_message = st.text_input("发送消息", key="chat_input")
-
-# # 当用户发送消息的时候
-# if user_message:
-#     if uploaded_file is not None:
-#         image_data = uploaded_file.getvalue()
-#         st.session_state['uploaded_image'] = image_data
-#         # 有新图片上传时重置消息发送状态
-#         st.session_state['message_sent'] = False
-#     # 显示用户的消息
-#     st.write(f"用户: {user_message}")
-
-#     # 如果这是用户上传图片后的第一次消息，并且有图片被上传
-#     if not st.session_state['message_sent'] and st.session_state['uploaded_image'] is not None:
-#         # 使用Pillow库来打开图片
-#         img = Image.open(io.BytesIO(st.session_state['uploaded_image']))
-#         st.image(img, caption='上传的图片', use_column_width=True)
-        
-#         # 标记消息已经发送，下次发送时不再附加图片
-#         st.session_state['message_sent'] = True
-#         # 以便下次发送消息时不再附带图片
-#         st.session_state['uploaded_image'] = None
-
-# import streamlit as st
-
-
-# # 初始化一个状态用于存储上传的图片
-# if 'uploaded_image' not in st.session_state:
-#     st.session_state['uploaded_image'] = None
-
-# # 初始化一个状态，当消息发送后变为True
-# if 'message_sent' not in st.session_state:
-#     st.session_state['message_sent'] = False
-
-
-# # 创建一个可更新的容器
-# uploader = st.empty()
-# uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
-# if uploaded_file is not None:
-#     # st.image(uploaded_file)
-#     st.session_state['uploaded_image'] = uploaded_file
-
-
-# user_message = st.chat_input('input a message')
-
-# if user_message:
-#     with st.chat_message('user'):
-#         st.write(user_message)
-#         if st.session_state['uploaded_image']:
-#             st.image(st.session_state['uploaded_image'])
-#             st.session_state['message_sent'] = True
-            
-# if st.session_state['message_sent']:
-#     st.session_state['uploaded_image'] = None
-#     st.session_state['message_sent'] = False
-#     uploader.empty()
-#     uploader = st.empty()
-#     uploader.file_uploader("Choose a file", type=["jpg", "png"], key='new_uploader')
-
-
 import streamlit as st
+import numpy as np
+import random
+import time
+from PIL import Image
+import os
+import mimetypes
+from supabase import create_client, Client, StorageException
+from io import StringIO, BytesIO
+from tempfile import NamedTemporaryFile
+import json
+import requests
 
-# 初始化 session_state
-if 'uploaded_image' not in st.session_state:
-    st.session_state['uploaded_image'] = None
 
-if 'message_sent' not in st.session_state:
-    st.session_state['message_sent'] = False
+# check if image
+def is_image(file_path):
+	try:
+		Image.open(file_path)
+		return True
+	except IOError:
+		return False
 
-# 在侧边栏创建文件上传组件，每次消息发送状态改变就更新组件的key
-key = "file_uploader_" + ("sent" if st.session_state['message_sent'] else "not_sent")
-uploaded_file = st.sidebar.file_uploader("Choose a file", type=["jpg", "png"], key=key)
+def get_supabase_client():
+	url = st.secrets['supabase_url']
+	key = st.secrets['supabase_key']
+	supabase = create_client(url, key)
+	return supabase
 
-# 如果有文件上传，更新 session_state 中的图片
-if uploaded_file is not None:
-    st.session_state['uploaded_image'] = uploaded_file
+# insert data to database
+def supabase_insert_message(user_message,response_content,messages,content_type,service_channel):
+    supabase = get_supabase_client()
+    data, count = supabase.table('messages').insert({"user_message": user_message, "response_content": response_content,"messages":messages,"content_type":content_type,"service_channel":service_channel}).execute()
 
-# 创建聊天输入框
-user_message = st.text_input('Input a message', key="message_input")
+def supabase_insert_user(name,user_name,profile,picture,oauth_token):
+    supabase = get_supabase_client()
+    data, count = supabase.table('users').insert({"name":name,"user_name":user_name,"profile":profile,"picture":picture,"oauth_token":oauth_token}).execute()
 
-# 用户发送消息
-if user_message:
-    # 显示用户消息
-    with st.container():
-        st.write("User:", user_message)
-        # 如果有图片上传，显示图片
-        if st.session_state['uploaded_image'] is not None:
-            st.image(uploaded_file)
-            # 既然消息发出去了，我们就可以将其设置为True来改变上传器的key
-            st.session_state['message_sent'] = True
-            # 清空输入框和图片展示区，为下一次的消息和图片上传做准备
-            st.session_state['uploaded_image'] = None
-            # st.session_state['message_input'] = ""
+
+def supabase_fetch_user(user_name):
+    supabase = get_supabase_client()
+    data,count = supabase.table('users').select("*").eq('user_name',user_name).execute()
+    return data
+        
+
+# check if file already exists
+def check_supabase_file_exists(file_path):
+	supabase = get_supabase_client()
+	bucket_name = st.secrets["bucket_name"]
+	supabase_storage_ls = supabase.storage.from_(bucket_name).list()
+	
+	if any(file["name"] == os.path.basename(file_path) for file in supabase_storage_ls):
+		return True
+	else:
+		return False
+
+
+def upload_file_to_supabase_storage(file_obj):
+	base_name = os.path.basename(file_obj.name)
+	path_on_supastorage = os.path.splitext(base_name)[0] + '_' + str(round(time.time())//6000)  + os.path.splitext(base_name)[1]
+	mime_type, _ = mimetypes.guess_type(file_obj.name)
+	
+	supabase = get_supabase_client()
+	bucket_name = st.secrets["bucket_name"]
+	
+	bytes_data = file_obj.getvalue()
+	with NamedTemporaryFile(delete=False) as temp_file:
+		temp_file.write(bytes_data)
+		temp_file_path = temp_file.name
+	
+	try:
+		with open(temp_file_path, "rb") as f:
+			if check_supabase_file_exists(path_on_supastorage):
+				public_url = supabase.storage.from_(bucket_name).get_public_url(path_on_supastorage)
+			else:
+				supabase.storage.from_(bucket_name).upload(file=temp_file_path, path=path_on_supastorage, file_options={"content-type": mime_type})
+				public_url = supabase.storage.from_(bucket_name).get_public_url(path_on_supastorage)
+	except StorageException as e:
+		print("StorageException:", e)
+		raise
+	finally:
+		os.remove(temp_file_path)  # Ensure the temporary file is removed
+	
+	return public_url
+
+
+
+
+
+# Initialize file uploader
+if 'uploaded_file' not in st.session_state:
+	st.session_state.uploaded_file = None
+
+# upload file
+with st.sidebar:
+	about = """
+	# ChatGPT-4o
+	
+	This is GPT-4o, **totally free** for now!
+	
+	You can use the text and image capabilities now. More capabilities like audio and video will be rolled out iteratively in the future. Stay tuned.
+	"""
+	st.markdown(about)
+
+	st.divider()
+
+	st.markdown("**Buy me a coffee:rose::rose::rose:**")
+	st.image(["https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o/Buy%20Me%20a%20Coffe-qrcode_2860875.png","https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o/_____20240524133837_1.png"],caption=["Paypal","Wechat"])
+	st.divider()
+
+	# file uploader
+	st.markdown("**Upload image to your chat.**")
+	file_uploader_key = str(st.session_state.get('file_uploader_key', ''))
+	uploaded_file = st.file_uploader("Upload File", key=file_uploader_key)
+	if uploaded_file is not None:
+		# display filename
+		# st.write("Filename:", uploaded_file.name)
+		st.session_state.uploaded_file = uploaded_file
+		if uploaded_file.type.startswith("image/"):
+			st.image(uploaded_file)
+		st.session_state['file_uploader_key'] = st.session_state.get('file_uploader_key', '') + 'new'
+
+
+prompt = st.chat_input("What is up?")
+
+# React to user input
+if prompt:
+	# Display user message in chat message container
+	with st.chat_message("user"):
+		st.markdown(prompt)
+	# if uploaded image, display in message list and remove from sidebar
+	if st.session_state.uploaded_file and st.session_state.uploaded_file.type.startswith("image/"):
+		public_url = upload_file_to_supabase_storage(st.session_state.uploaded_file)
+		st.image(public_url)
+		st.session_state.uploaded_file = None
+
+
