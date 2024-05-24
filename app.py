@@ -35,24 +35,24 @@
 #     st.chat_message("assistant").write("这是你的回复消息。")
 
 
-import streamlit as st
-from PIL import Image
-import io
+# import streamlit as st
+# from PIL import Image
+# import io
 
-# 初始化一个状态用于存储上传的图片
-if 'uploaded_image' not in st.session_state:
-    st.session_state['uploaded_image'] = None
+# # 初始化一个状态用于存储上传的图片
+# if 'uploaded_image' not in st.session_state:
+#     st.session_state['uploaded_image'] = None
 
-# 初始化一个状态，当消息发送后变为True
-if 'message_sent' not in st.session_state:
-    st.session_state['message_sent'] = False
+# # 初始化一个状态，当消息发送后变为True
+# if 'message_sent' not in st.session_state:
+#     st.session_state['message_sent'] = False
 
-# 侧边栏的文件上传组件
-uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
+# # 侧边栏的文件上传组件
+# uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
 
 
-# 主页面的chat input组件
-user_message = st.text_input("发送消息", key="chat_input")
+# # 主页面的chat input组件
+# user_message = st.text_input("发送消息", key="chat_input")
 
 # # 当用户发送消息的时候
 # if user_message:
