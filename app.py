@@ -144,4 +144,4 @@ if user_message:
             st.session_state['message_sent'] = True
             # 清空输入框和图片展示区，为下一次的消息和图片上传做准备
             st.session_state['uploaded_image'] = None
-            st.session_state['message_input'] = ""
+            # st.session_state['message_input'] = ""
