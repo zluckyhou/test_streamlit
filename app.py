@@ -26,6 +26,7 @@ if message:
         if st.session_state.uploaded_image is not None and not st.session_state.image_sent:
             st.image(st.session_state.uploaded_image)
             st.session_state.image_sent = True
+            st.session_state.uploaded_image = None
     
 
     # 显示回复消息
