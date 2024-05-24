@@ -5,15 +5,15 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-if 'logger_initialized' not in st.session_state:
-    # 创建一个控制台日志处理器
-    console_handler = logging.StreamHandler()
-    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    console_handler.setFormatter(console_formatter)
-    logger.addHandler(console_handler)
+# 清除现有的处理器，避免重复添加
+if logger.hasHandlers():
+    logger.handlers.clear()
 
-    # 标记为已初始化
-    st.session_state.logger_initialized = True
+# 创建一个控制台日志处理器
+console_handler = logging.StreamHandler()
+console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+logger.addHandler(console_handler)
 
 # 记录一些日志
 logger.info("这是一个信息日志")
