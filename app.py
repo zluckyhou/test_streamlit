@@ -77,22 +77,19 @@
 
 import streamlit as st
 
-# 初始化 session_state
-if "uploaded_file" not in st.session_state:
-    st.session_state.uploaded_file = None
+# 创建一个上下文管理器,用于重置组件状态
+@st.cache_data
+def make_file_uploader():
+    return st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
 
-# 上传文件
-uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"])
-
-# 更新 session_state
-if uploaded_file is not None:
-    st.session_state.uploaded_file = uploaded_file
+# 初始化文件上传器
+uploaded_file = make_file_uploader()
 
 # 显示上传的文件
-if st.session_state.uploaded_file is not None:
-    st.image(st.session_state.uploaded_file)
+if uploaded_file is not None:
+    st.image(uploaded_file)
 
 # 清空按钮
 if st.button("Clear"):
-    st.session_state.uploaded_file = None
-
+    # 重新创建上下文管理器,清空组件状态
+    uploaded_file = make_file_uploader()
