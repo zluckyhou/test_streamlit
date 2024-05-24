@@ -35,7 +35,6 @@
 #     st.chat_message("assistant").write("这是你的回复消息。")
 
 
-
 import streamlit as st
 from PIL import Image
 import io
@@ -44,11 +43,17 @@ import io
 if 'uploaded_image' not in st.session_state:
     st.session_state['uploaded_image'] = None
 
+# 初始化一个状态，当消息发送后变为True
+if 'message_sent' not in st.session_state:
+    st.session_state['message_sent'] = False
+
 # 侧边栏的文件上传组件
 uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
 if uploaded_file is not None:
     image_data = uploaded_file.getvalue()
     st.session_state['uploaded_image'] = image_data
+    # 有新图片上传时重置消息发送状态
+    st.session_state['message_sent'] = False
 
 # 主页面的chat input组件
 user_message = st.text_input("发送消息", key="chat_input")
@@ -58,12 +63,14 @@ if user_message:
     # 显示用户的消息
     st.write(f"用户: {user_message}")
 
-    # 如果存在图片，将图片显示出来
-    if st.session_state['uploaded_image'] is not None:
-        # 使用Pillow库来开启图片
+    # 如果这是用户上传图片后的第一次消息，并且有图片被上传
+    if not st.session_state['message_sent'] and st.session_state['uploaded_image'] is not None:
+        # 使用Pillow库来打开图片
         img = Image.open(io.BytesIO(st.session_state['uploaded_image']))
         st.image(img, caption='上传的图片', use_column_width=True)
         
-        # 设置图片状态，以便下次发送消息时不再附带图片
+        # 标记消息已经发送，下次发送时不再附加图片
+        st.session_state['message_sent'] = True
+        # 以便下次发送消息时不再附带图片
         st.session_state['uploaded_image'] = None
 
