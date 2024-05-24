@@ -75,39 +75,73 @@
 #         # 以便下次发送消息时不再附带图片
 #         st.session_state['uploaded_image'] = None
 
+# import streamlit as st
+
+
+# # 初始化一个状态用于存储上传的图片
+# if 'uploaded_image' not in st.session_state:
+#     st.session_state['uploaded_image'] = None
+
+# # 初始化一个状态，当消息发送后变为True
+# if 'message_sent' not in st.session_state:
+#     st.session_state['message_sent'] = False
+
+
+# # 创建一个可更新的容器
+# uploader = st.empty()
+# uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
+# if uploaded_file is not None:
+#     # st.image(uploaded_file)
+#     st.session_state['uploaded_image'] = uploaded_file
+
+
+# user_message = st.chat_input('input a message')
+
+# if user_message:
+#     with st.chat_message('user'):
+#         st.write(user_message)
+#         if st.session_state['uploaded_image']:
+#             st.image(st.session_state['uploaded_image'])
+#             st.session_state['message_sent'] = True
+            
+# if st.session_state['message_sent']:
+#     st.session_state['uploaded_image'] = None
+#     st.session_state['message_sent'] = False
+#     uploader.empty()
+#     uploader = st.empty()
+#     uploader.file_uploader("Choose a file", type=["jpg", "png"], key='new_uploader')
+
+
 import streamlit as st
 
-
-# 初始化一个状态用于存储上传的图片
+# 初始化 session_state
 if 'uploaded_image' not in st.session_state:
     st.session_state['uploaded_image'] = None
 
-# 初始化一个状态，当消息发送后变为True
 if 'message_sent' not in st.session_state:
     st.session_state['message_sent'] = False
 
+# 在侧边栏创建文件上传组件，每次消息发送状态改变就更新组件的key
+key = "file_uploader_" + ("sent" if st.session_state['message_sent'] else "not_sent")
+uploaded_file = st.sidebar.file_uploader("Choose a file", type=["jpg", "png"], key=key)
 
-# 创建一个可更新的容器
-uploader = st.empty()
-uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"])
+# 如果有文件上传，更新 session_state 中的图片
 if uploaded_file is not None:
-    # st.image(uploaded_file)
     st.session_state['uploaded_image'] = uploaded_file
 
+# 创建聊天输入框
+user_message = st.text_input('Input a message', key="message_input")
 
-user_message = st.chat_input('input a message')
-
+# 用户发送消息
 if user_message:
-    with st.chat_message('user'):
-        st.write(user_message)
-        if st.session_state['uploaded_image']:
-            st.image(st.session_state['uploaded_image'])
+    # 显示用户消息
+    with st.container():
+        st.write("User:", user_message)
+        # 如果有图片上传，显示图片
+        if st.session_state['uploaded_image'] is not None:
+            st.image(uploaded_file)
+            # 既然消息发出去了，我们就可以将其设置为True来改变上传器的key
             st.session_state['message_sent'] = True
-            
-if st.session_state['message_sent']:
-    st.session_state['uploaded_image'] = None
-    st.session_state['message_sent'] = False
-    uploader.empty()
-    uploader = st.empty()
-    uploader.file_uploader("Choose a file", type=["jpg", "png"], key='new_uploader')
-        
+            # 清空输入框和图片展示区，为下一次的消息和图片上传做准备
+            st.session_state['uploaded_image'] = None
+            st.session_state['message_input'] = ""
