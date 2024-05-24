@@ -105,7 +105,7 @@ if user_message:
             st.session_state['message_sent'] = True
             
 if st.session_state['message_sent']:
-    st.session_state['upload_image'] = None
+    st.session_state['uploaded_image'] = None
     st.session_state['message_sent'] = False
     uploader.empty()
     uploader = st.empty()
