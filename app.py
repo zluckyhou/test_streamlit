@@ -107,6 +107,7 @@ if user_message:
 if st.session_state['message_sent']:
     st.session_state['upload_image'] = None
     st.session_state['message_sent'] = False
+    uploader.empty()
     uploader = st.empty()
     uploader.file_uploader("Choose a file", type=["jpg", "png"], key='new_uploader')
         
