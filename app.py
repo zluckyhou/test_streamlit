@@ -1,35 +1,69 @@
+# import streamlit as st
+
+# # 用于存储上传的图片
+# if 'uploaded_image' not in st.session_state:
+#     st.session_state.uploaded_image = None
+    
+# if 'image_sent' not in st.session_state:
+#     st.session_state.image_sent = False
+
+
+
+# # 右侧 Chat 输入组件
+# message = st.chat_input("发送消息")
+
+# # 侧边栏文件上传组件
+# uploaded_file = st.sidebar.file_uploader("上传图片", type=["jpg", "png", "jpeg"])
+
+# # 如果有文件上传，则保存到 session state
+# if uploaded_file is not None:
+#     st.session_state.uploaded_image = uploaded_file
+#     st.session_state.image_sent = False
+
+# if message:
+#     # 显示聊天消息
+#     with st.chat_message("user"):
+#         st.write(message)
+#         # 如果有上传的图片，并且这是第一次发送消息，显示图片
+#         if st.session_state.uploaded_image is not None and not st.session_state.image_sent:
+#             st.image(st.session_state.uploaded_image)
+#             st.session_state.image_sent = True
+#             st.session_state.uploaded_image = None
+    
+
+#     # 显示回复消息
+#     st.chat_message("assistant").write("这是你的回复消息。")
+
+
+
 import streamlit as st
+from PIL import Image
+import io
 
-# 用于存储上传的图片
+# 初始化一个状态用于存储上传的图片
 if 'uploaded_image' not in st.session_state:
-    st.session_state.uploaded_image = None
-    
-if 'image_sent' not in st.session_state:
-    st.session_state.image_sent = False
+    st.session_state['uploaded_image'] = None
 
-
-
-# 右侧 Chat 输入组件
-message = st.chat_input("发送消息")
-
-# 侧边栏文件上传组件
-uploaded_file = st.sidebar.file_uploader("上传图片", type=["jpg", "png", "jpeg"])
-
-# 如果有文件上传，则保存到 session state
+# 侧边栏的文件上传组件
+uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
 if uploaded_file is not None:
-    st.session_state.uploaded_image = uploaded_file
-    st.session_state.image_sent = False
+    image_data = uploaded_file.getvalue()
+    st.session_state['uploaded_image'] = image_data
 
-if message:
-    # 显示聊天消息
-    with st.chat_message("user"):
-        st.write(message)
-        # 如果有上传的图片，并且这是第一次发送消息，显示图片
-        if st.session_state.uploaded_image is not None and not st.session_state.image_sent:
-            st.image(st.session_state.uploaded_image)
-            st.session_state.image_sent = True
-            st.session_state.uploaded_image = None
-    
+# 主页面的chat input组件
+user_message = st.text_input("发送消息", key="chat_input")
 
-    # 显示回复消息
-    st.chat_message("assistant").write("这是你的回复消息。")
+# 当用户发送消息的时候
+if user_message:
+    # 显示用户的消息
+    st.write(f"用户: {user_message}")
+
+    # 如果存在图片，将图片显示出来
+    if st.session_state['uploaded_image'] is not None:
+        # 使用Pillow库来开启图片
+        img = Image.open(io.BytesIO(st.session_state['uploaded_image']))
+        st.image(img, caption='上传的图片', use_column_width=True)
+        
+        # 设置图片状态，以便下次发送消息时不再附带图片
+        st.session_state['uploaded_image'] = None
+
