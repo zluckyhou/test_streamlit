@@ -76,10 +76,19 @@
 #         st.session_state['uploaded_image'] = None
 
 import streamlit as st
-import time
 
-with st.empty():
-    for seconds in range(3):
-        st.write(f"⏳ {seconds} seconds have passed")
-        time.sleep(1)
-    st.write("✔️ 1 minute over!")
+# 创建一个可更新的容器
+uploader = st.empty()
+
+# 初始化文件上传器
+uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+
+# 显示上传的文件
+if uploaded_file is not None:
+    st.image(uploaded_file)
+
+# 清空按钮
+if st.button("Clear"):
+    # 重新渲染容器,清空文件上传组件
+    uploader.empty()
+    # uploaded_file = uploader.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
