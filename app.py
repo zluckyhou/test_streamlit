@@ -80,9 +80,15 @@ import streamlit as st
 # 创建一个容器
 container = st.container()
 
+# 标志变量,用于控制使用哪个键
+reset_flag = False
+
 # 在容器中初始化文件上传器
 with container:
-    uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    if not reset_flag:
+        uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+    else:
+        uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
 
     # 显示上传的文件
     if uploaded_file is not None:
@@ -90,6 +96,10 @@ with container:
 
 # 清空按钮
 if st.button("Clear"):
+    reset_flag = True  # 设置标志为 True
     # 重新渲染容器,清空内容
     with container:
-        uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+        if reset_flag:
+            uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
+        else:
+            uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
