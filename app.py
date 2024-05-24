@@ -77,29 +77,18 @@
 
 import streamlit as st
 
-# 创建一个容器
-container = st.container()
+placeholder = st.empty()
 
-# 标志变量,用于控制使用哪个键
-reset_flag = False
+# Replace the placeholder with some text:
+placeholder.text("Hello")
 
-# 在容器中初始化文件上传器
-with container:
-    if not reset_flag:
-        uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
-    else:
-        uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
+# Replace the text with a chart:
+placeholder.line_chart({"data": [1, 5, 2, 6]})
 
-    # 显示上传的文件
-    if uploaded_file is not None:
-        st.image(uploaded_file)
+# Replace the chart with several elements:
+with placeholder.container():
+    st.write("This is one element")
+    st.write("This is another")
 
-# 清空按钮
-if st.button("Clear"):
-    reset_flag = True  # 设置标志为 True
-    # 重新渲染容器,清空内容
-    with container:
-        if reset_flag:
-            uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader_reset")
-        else:
-            uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png"], key="file_uploader")
+# Clear all those elements:
+placeholder.empty()
