@@ -84,29 +84,12 @@ def upload_file_to_supabase_storage(file_obj):
 
 
 
-
-
 # Initialize file uploader
 if 'uploaded_file' not in st.session_state:
 	st.session_state.uploaded_file = None
 
 # upload file
 with st.sidebar:
-	about = """
-	# ChatGPT-4o
-	
-	This is GPT-4o, **totally free** for now!
-	
-	You can use the text and image capabilities now. More capabilities like audio and video will be rolled out iteratively in the future. Stay tuned.
-	"""
-	st.markdown(about)
-
-	st.divider()
-
-	st.markdown("**Buy me a coffee:rose::rose::rose:**")
-	st.image(["https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o/Buy%20Me%20a%20Coffe-qrcode_2860875.png","https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o/_____20240524133837_1.png"],caption=["Paypal","Wechat"])
-	st.divider()
-
 	# file uploader
 	st.markdown("**Upload image to your chat.**")
 	file_uploader_key = str(st.session_state.get('file_uploader_key', ''))
