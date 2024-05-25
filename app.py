@@ -1,82 +1,68 @@
-import streamlit as st
-from streamlit_oauth import OAuth2Component
-import os
-import base64
 import json
-
-# import logging
-# logging.basicConfig(level=logging.INFO)
-
-st.title("Google OIDC Example")
-st.write("This example shows how to use the raw OAuth2 component to authenticate with a Google OAuth2 and get email from id_token.")
-
-# create an OAuth2Component instance
-CLIENT_ID = st.secrets["client_id"]  # Google Client ID
-CLIENT_SECRET = st.secrets["client_secret"]  # Google Client Secret
-AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
-TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
-REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
-
-
-if "auth" not in st.session_state:
-    # create a button to start the OAuth2 flow
-    oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_ENDPOINT, TOKEN_ENDPOINT, TOKEN_ENDPOINT, REVOKE_ENDPOINT)
-    result = oauth2.authorize_button(
-        name="Continue with Google",
-        icon="https://www.google.com.tw/favicon.ico",
-        redirect_uri="http://localhost:8501",
-        scope="openid email profile",
-        key="google",
-        extras_params={"prompt": "consent", "access_type": "offline"},
-        use_container_width=True,
-        pkce='S256',
-    )
-    
-    if result:
-        st.write(result)
-        # decode the id_token jwt and get the user's email address
-        id_token = result["token"]["id_token"]
-        # verify the signature is an optional step for security
-        payload = id_token.split(".")[1]
-        # add padding to the payload if needed
-        payload += "=" * (-len(payload) % 4)
-        payload = json.loads(base64.b64decode(payload))
-        email = payload["email"]
-        st.session_state["auth"] = email
-        st.session_state["token"] = result["token"]
-        st.rerun()
-else:
-    st.write("You are logged in!")
-    st.write(st.session_state["auth"])
-    st.write(st.session_state["token"])
-    if st.button("Logout"):
-        del st.session_state["auth"]
-        del st.session_state["token"]
-
+import os
+from urllib.parse import quote_plus, urlencode
 
 import streamlit as st
+from authlib.integrations.base_client import RemoteApp
+from authlib.integrations.requests_client import OAuth2Session
+from dotenv import load_dotenv
 
-# CSS for Google login button
-google_button_css = """
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 20px;
-    font-family: Roboto, sans-serif;
-    font-size: 14px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-""".replace("\n", " ")
+load_dotenv()
 
-result = "https://www.google.com"  # 替换为实际的 Google 登录 URL
+# AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+# AUTH0_CLIENT_ID = os.getenv("AUTH0_CLIENT_ID")
+# AUTH0_CLIENT_SECRET = os.getenv("AUTH0_CLIENT_SECRET")
+# AUTH0_REDIRECT_URI = os.getenv("AUTH0_REDIRECT_URI")
+# AUTH0_LOGOUT_REDIRECT_URI = os.getenv("AUTH0_LOGOUT_REDIRECT_URI")
 
-st.markdown(f"""
-    <a href="{result}" style="{google_button_css}">
-        <img src="https://www.google.com.tw/favicon.ico" style="margin-right: 8px; width:20px; height:20px">
-        Continue with Google
-    </a>
-""", unsafe_allow_html=True)
+AUTH0_CLIENT_ID = st.secrets["client_id"]  # Google Client ID
+AUTH0_CLIENT_SECRET = st.secrets["client_secret"]  # Google Client Secret
+AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
+# TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+# REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
+AUTH0_DOMAIN = st.secrets['auth_domain']
+AUTH0_REDIRECT_URI = st.secrets["redirect_url"]
+AUTH0_LOGOUT_REDIRECT_URI = st.secrets["redirect_url"]
+
+# Initialize Auth0 app
+auth0 = RemoteApp(
+    client_id=AUTH0_CLIENT_ID,
+    client_secret=AUTH0_CLIENT_SECRET,
+    api_base_url=f"https://{AUTH0_DOMAIN}",
+    authorize_url=f"https://{AUTH0_DOMAIN}/authorize",
+    authorize_params=None,
+    access_token_url=f"https://{AUTH0_DOMAIN}/oauth/token",
+    access_token_params=None,
+    refresh_token_url=None,
+    redirect_uri=AUTH0_REDIRECT_URI,
+    client_kwargs={"scope": "openid profile email"},
+)
+
+# Streamlit app
+st.title("Auth0 Login Example")
+
+# Login button
+login_button = st.button("Login")
+
+if login_button:
+    redirect_uri = auth0.authorize_redirect(redirect_uri=AUTH0_REDIRECT_URI)
+    st.write(f'<a href="{redirect_uri}" target="_self">Redirect to Auth0 Login</a>', unsafe_allow_html=True)
+
+# Fetch the token and user info
+query_params = st.experimental_get_query_params()
+code = query_params.get("code", [None])[0]
+
+if code:
+    token = auth0.authorize_access_token(code=code, redirect_uri=AUTH0_REDIRECT_URI)
+    user_info = auth0.get("userinfo", token=token).json()
+    st.write("User Info:", json.dumps(user_info, indent=4))
+
+    # Logout button
+    logout_button = st.button("Logout")
+    if logout_button:
+        params = {
+            "returnTo": AUTH0_LOGOUT_REDIRECT_URI,
+            "client_id": AUTH0_CLIENT_ID,
+        }
+        logout_url = f"https://{AUTH0_DOMAIN}/v2/logout?" + urlencode(params, quote_via=quote_plus)
+        st.write(f'<a href="{logout_url}" target="_self">Logout</a>', unsafe_allow_html=True)
