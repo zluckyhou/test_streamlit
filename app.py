@@ -52,3 +52,31 @@ else:
     if st.button("Logout"):
         del st.session_state["auth"]
         del st.session_state["token"]
+
+
+import streamlit as st
+
+# CSS for Google login button
+google_button_css = """
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+""".replace("\n", " ")
+
+result = "https://www.google.com"  # 替换为实际的 Google 登录 URL
+
+st.markdown(f"""
+    <a href="{result}" style="{google_button_css}">
+        <img src="https://www.google.com.tw/favicon.ico" style="margin-right: 8px; width:20px; height:20px">
+        Continue with Google
+    </a>
+""", unsafe_allow_html=True)
