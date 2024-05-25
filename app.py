@@ -1,68 +1,59 @@
-import json
 import os
-from urllib.parse import quote_plus, urlencode
-
 import streamlit as st
-from authlib.integrations.base_client import RemoteApp
 from authlib.integrations.requests_client import OAuth2Session
-from dotenv import load_dotenv
 
-load_dotenv()
 
-# AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
-# AUTH0_CLIENT_ID = os.getenv("AUTH0_CLIENT_ID")
-# AUTH0_CLIENT_SECRET = os.getenv("AUTH0_CLIENT_SECRET")
-# AUTH0_REDIRECT_URI = os.getenv("AUTH0_REDIRECT_URI")
-# AUTH0_LOGOUT_REDIRECT_URI = os.getenv("AUTH0_LOGOUT_REDIRECT_URI")
 
+# 设置Auth0的客户端ID和秘密、域以及会话秘钥
 AUTH0_CLIENT_ID = st.secrets["client_id"]  # Google Client ID
 AUTH0_CLIENT_SECRET = st.secrets["client_secret"]  # Google Client Secret
-AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
-# TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
-# REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 AUTH0_DOMAIN = st.secrets['auth_domain']
-AUTH0_REDIRECT_URI = st.secrets["redirect_url"]
-AUTH0_LOGOUT_REDIRECT_URI = st.secrets["redirect_url"]
+# SESSION_SECRET_KEY = os.getenv("APP_SECRET_KEY")
 
-# Initialize Auth0 app
-auth0 = RemoteApp(
+# 创建OAuth 2会话
+oauth2_session = OAuth2Session(
     client_id=AUTH0_CLIENT_ID,
     client_secret=AUTH0_CLIENT_SECRET,
-    api_base_url=f"https://{AUTH0_DOMAIN}",
-    authorize_url=f"https://{AUTH0_DOMAIN}/authorize",
-    authorize_params=None,
-    access_token_url=f"https://{AUTH0_DOMAIN}/oauth/token",
-    access_token_params=None,
-    refresh_token_url=None,
-    redirect_uri=AUTH0_REDIRECT_URI,
-    client_kwargs={"scope": "openid profile email"},
+    redirect_uri=st.secrets["redirect_url"]
 )
 
-# Streamlit app
-st.title("Auth0 Login Example")
+def login():
+    # 生成Auth0授权URL和session state
+    uri, state = oauth2_session.create_authorization_url(
+        f'https://{AUTH0_DOMAIN}/authorize',
+        scope="openid profile email"
+    )
+    st.session_state['oauth_state'] = state
+    # 重定向用户到Auth0
+    st.write('Please login at', uri)
 
-# Login button
-login_button = st.button("Login")
+def logout():
+    # 清除会话状态
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    # 重定向用户到Auth0注销URL
+    st.write('You have been logged out.')
 
-if login_button:
-    redirect_uri = auth0.authorize_redirect(redirect_uri=AUTH0_REDIRECT_URI)
-    st.write(f'<a href="{redirect_uri}" target="_self">Redirect to Auth0 Login</a>', unsafe_allow_html=True)
+if 'oauth_state' in st.session_state:
+    # 处理从Auth0回调后的交换令牌
+    token = oauth2_session.fetch_token(
+        f'https://{AUTH0_DOMAIN}/oauth/token',
+        authorization_response=st.experimental_get_query_params()['code'],
+        client_secret=AUTH0_CLIENT_SECRET
+    )
+    st.session_state['oauth_token'] = token
+   
+    # 这里获取用户信息，只是一个示例
+    user_info = oauth2_session.get(f'https://{AUTH0_DOMAIN}/userinfo').json()
+    st.session_state['user_info'] = user_info
 
-# Fetch the token and user info
-query_params = st.experimental_get_query_params()
-code = query_params.get("code", [None])[0]
+    # 这里应当重定向到应用程序的主页或其他页面
 
-if code:
-    token = auth0.authorize_access_token(code=code, redirect_uri=AUTH0_REDIRECT_URI)
-    user_info = auth0.get("userinfo", token=token).json()
-    st.write("User Info:", json.dumps(user_info, indent=4))
+if 'user_info' not in st.session_state:
+    st.button('Login with Auth0', on_click=login)
+else:
+    st.write(st.session_state['user_info'])
 
-    # Logout button
-    logout_button = st.button("Logout")
-    if logout_button:
-        params = {
-            "returnTo": AUTH0_LOGOUT_REDIRECT_URI,
-            "client_id": AUTH0_CLIENT_ID,
-        }
-        logout_url = f"https://{AUTH0_DOMAIN}/v2/logout?" + urlencode(params, quote_via=quote_plus)
-        st.write(f'<a href="{logout_url}" target="_self">Logout</a>', unsafe_allow_html=True)
+    st.button('Logout', on_click=logout)
+
+# 应用程序其他的主体代码...
