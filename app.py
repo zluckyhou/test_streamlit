@@ -13,11 +13,15 @@ import streamlit as st
 from authlib.integrations.requests_client import OAuth2Session
 
 # 使用Streamlit的秘密管理获取配置
-AUTH0_CLIENT_ID = st.secrets["client_id"]
-AUTH0_CLIENT_SECRET = st.secrets["client_secret"]
-AUTH0_DOMAIN = st.secrets["auth_domain"]
+AUTH0_CLIENT_ID = st.secrets["auth0_client_id"]
+AUTH0_CLIENT_SECRET = st.secrets["auth0_client_secret"]
+AUTH0_DOMAIN = st.secrets["auth0_domain"]
 AUTH0_BASE_URL = f'https://{AUTH0_DOMAIN}'
-AUTH0_CALLBACK_URL = st.secrets["redirect_url"]
+AUTH0_CALLBACK_URL = st.secrets["auth0_callback_url"]
+
+
+
+
 
 # 创建OAuth会话
 oauth = OAuth2Session(client_id=AUTH0_CLIENT_ID, client_secret=AUTH0_CLIENT_SECRET, scope='openid profile email', redirect_uri=AUTH0_CALLBACK_URL)
