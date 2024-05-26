@@ -9,51 +9,59 @@ AUTHORIZE_URL = 'https://accounts.google.com/o/oauth2/auth'
 TOKEN_URL = 'https://oauth2.googleapis.com/token'
 REDIRECT_URI = st.secrets["redirect_url"]  # 确保这与你在Google Cloud Platform中设置的相匹配
 
-# 创建OAuth2会话对象
-def create_oauth_session(state=None):
-    return OAuth2Session(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        authorization_endpoint=AUTHORIZE_URL,
-        token_endpoint=TOKEN_URL,
-        redirect_uri=REDIRECT_URI,
-        scope='openid email profile',
-        state=state
-    )
+import streamlit as st
+from authlib.integrations.requests_client import OAuth2Session
 
-# 处理OAuth回调
-def auth_callback(query_params):
-    if 'code' in query_params:
-        oauth_session = create_oauth_session(state=st.session_state.get('oauth_state'))
-        code = query_params['code'][0]
-        token = oauth_session.fetch_token(TOKEN_URL, code=code, include_client_id=True)
-        st.session_state['auth_token'] = token
+# 使用Streamlit的秘密管理获取配置
+AUTH0_CLIENT_ID = st.secrets["client_id"]
+AUTH0_CLIENT_SECRET = st.secrets["client_secret"]
+AUTH0_DOMAIN = st.secrets["auth_domain"]
+AUTH0_BASE_URL = f'https://{AUTH0_DOMAIN}'
+AUTH0_CALLBACK_URL = st.secrets["redirect_url"]
 
-# 获取查询参数
-query_params = st.query_params
+# 创建OAuth会话
+oauth = OAuth2Session(client_id=AUTH0_CLIENT_ID, client_secret=AUTH0_CLIENT_SECRET, scope='openid profile email', redirect_uri=AUTH0_CALLBACK_URL)
 
-# 处理OAuth回调
-if 'code' in query_params:
-    auth_callback(query_params)
+# 定义获取token的函数
+def get_token():
+    return st.session_state.get("token", {})
 
-st.title('Google 登录示例')
+# 定义保存token的函数
+def set_token(token):
+    st.session_state["token"] = token
 
-if 'auth_token' not in st.session_state:
-    # 创建OAuth会话并生成授权URL
-    oauth_session = create_oauth_session()
-    authorize_url, state = oauth_session.create_authorization_url(AUTHORIZE_URL)
-    st.session_state['oauth_state'] = state
-    st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
+# 定义清除session的函数
+def clear_session():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+
+# 登录页面
+def login():
+    auth_url, state = oauth.create_authorization_url(AUTH0_BASE_URL + '/authorize')
+    set_token({"state": state})
+    st.session_state['auth_url'] = auth_url
+    st.markdown(f'请点击此链接进行登录: [Auth0登录]({auth_url})')
+
+# 处理回调
+def callback():
+    code = st.query_params.get('code')
+    if code:
+        code = code[0]
+        try:
+            token = oauth.fetch_token(AUTH0_BASE_URL + '/oauth/token', authorization_response=f"{AUTH0_CALLBACK_URL}?code={code}", state=get_token()['state'])
+            set_token(token)
+            st.query_params.clear()  # 清除URL中的参数
+            st.success('登录成功!')
+        except Exception as e:
+            st.error('认证失败: ' + str(e))
+
+# 主界面
+if 'auth_url' in st.query_params:
+    callback()
+
+if 'token' in st.session_state:
+    st.write("你已经登录!")
+    st.button("登出", on_click=clear_session)
 else:
-    # 使用OAuth令牌获取用户信息
-    oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
-    oauth_session.token = st.session_state['auth_token']
-    resp = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo')
-    if resp.ok:
-        user_info = resp.json()
-        st.write(f'Hi {user_info["name"]}!')
-    else:
-        st.error("Failed to fetch user details.")
+    login()
 
-    if st.button('Logout'):
-        st.session_state.pop('auth_token', None)
