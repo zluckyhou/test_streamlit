@@ -8,6 +8,21 @@ import base64
 
 
 
+# set logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# clear logger if exists
+if logger.hasHandlers():
+    logger.handlers.clear()
+
+# create a console logger
+console_handler = logging.StreamHandler()
+console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+logger.addHandler(console_handler)
+
+
 
 # create an OAuth2Component instance
 CLIENT_ID = st.secrets["client_id"]  # Google Client ID
@@ -54,13 +69,13 @@ with st.sidebar:
 				text-decoration: none;
 			""".replace("\n", " ") 
 			
-			st.markdown(f"""
-				<a href="{result}">
-					<img src="https://www.google.com.tw/favicon.ico">
-					Continue with Google
-				</a>
-			""", unsafe_allow_html=True)
-			# st.write(result)
+			# st.markdown(f"""
+			# 	<a href="{result}">
+			# 		<img src="https://www.google.com.tw/favicon.ico">
+			# 		Continue with Google
+			# 	</a>
+			# """, unsafe_allow_html=True)
+			st.write(result)
 	
 			# decode the id_token jwt and get the user's email address
 			id_token = result["token"]["id_token"]
