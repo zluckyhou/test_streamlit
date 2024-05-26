@@ -35,24 +35,23 @@ def auth_callback():
 if 'code' in st.query_params():
     auth_callback()
 
-
-st.title('Google 登录示例')
-
-if 'auth_token' not in st.session_state:
-    # 创建OAuth会话并生成授权URL
-    oauth_session = create_oauth_session()
-    authorize_url, state = oauth_session.create_authorization_url(AUTHORIZE_URL)
-    st.session_state['oauth_state'] = state
-    st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
-else:
-    # 使用OAuth令牌获取用户信息
-    oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
-    oauth_session.token = st.session_state['auth_token']
-    resp = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo')
-    user_info = resp.json()
-    st.write(f'Hi {user_info["name"]}!')
-
-    if st.button('Logout'):
-        st.session_state.pop('auth_token', None)
+	st.title('Google 登录示例')
+	
+	if 'auth_token' not in st.session_state:
+	    # 创建OAuth会话并生成授权URL
+	    oauth_session = create_oauth_session()
+	    authorize_url, state = oauth_session.create_authorization_url(AUTHORIZE_URL)
+	    st.session_state['oauth_state'] = state
+	    st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
+	else:
+	    # 使用OAuth令牌获取用户信息
+	    oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
+	    oauth_session.token = st.session_state['auth_token']
+	    resp = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo')
+	    user_info = resp.json()
+	    st.write(f'Hi {user_info["name"]}!')
+	
+	    if st.button('Logout'):
+	        st.session_state.pop('auth_token', None)
 
 
