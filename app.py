@@ -44,15 +44,16 @@ def main():
 
 # 处理OAuth回调
 def auth_callback():
-    if 'code' in st.experimental_get_query_params():
+    if 'code' in st.query_params():
         oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
-        code = st.experimental_get_query_params()['code'][0]
+        code = st.query_params()['code'][0]
         token = oauth_session.fetch_token(TOKEN_URL, code=code, include_client_id=True)
         st.session_state['auth_token'] = token
 
 # 设置Streamlit页面配置
 if __name__ == "__main__":
-    if 'code' in st.experimental_get_query_params():
+    if 'code' in st.query_params():
         auth_callback()
     main()
+
 
