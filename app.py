@@ -17,7 +17,7 @@ TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 REDIRECT_URL = st.secrets["redirect_url"]
 
-with st.sidebar():
+with st.sidebar:
 	st.markdown("# Test login")
 	# login module
 	if "auth" not in st.session_state:
