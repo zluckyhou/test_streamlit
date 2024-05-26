@@ -55,8 +55,8 @@ with st.sidebar:
 			""".replace("\n", " ") 
 			
 			st.markdown(f"""
-				<a href="{result}" style="{google_button_css}">
-					<img src="https://www.google.com.tw/favicon.ico" style="margin-right: 8px; width:20px; height:20px">
+				<a href="{result}">
+					<img src="https://www.google.com.tw/favicon.ico">
 					Continue with Google
 				</a>
 			""", unsafe_allow_html=True)
