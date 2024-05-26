@@ -30,7 +30,7 @@ def auth_callback(query_params):
         st.session_state['auth_token'] = token
 
 # 获取查询参数
-query_params = st.query_params()
+query_params = st.query_params
 
 # 处理OAuth回调
 if 'code' in query_params:
