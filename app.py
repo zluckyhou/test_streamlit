@@ -21,37 +21,39 @@ def create_oauth_session(state=None):
         state=state
     )
 
-
-
 # 处理OAuth回调
-def auth_callback():
-    if 'code' in st.query_params():
-        oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
-        code = st.query_params()['code'][0]
+def auth_callback(query_params):
+    if 'code' in query_params:
+        oauth_session = create_oauth_session(state=st.session_state.get('oauth_state'))
+        code = query_params['code'][0]
         token = oauth_session.fetch_token(TOKEN_URL, code=code, include_client_id=True)
         st.session_state['auth_token'] = token
 
+# 获取查询参数
+query_params = st.query_params()
 
-if 'code' in st.query_params():
-	auth_callback()
+# 处理OAuth回调
+if 'code' in query_params:
+    auth_callback(query_params)
 
-	st.title('Google 登录示例')
-	
-	if 'auth_token' not in st.session_state:
-		# 创建OAuth会话并生成授权URL
-		oauth_session = create_oauth_session()
-		authorize_url, state = oauth_session.create_authorization_url(AUTHORIZE_URL)
-		st.session_state['oauth_state'] = state
-		st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
-	else:
-		# 使用OAuth令牌获取用户信息
-		oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
-		oauth_session.token = st.session_state['auth_token']
-		resp = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo')
-		user_info = resp.json()
-		st.write(f'Hi {user_info["name"]}!')
-	
-		if st.button('Logout'):
-			st.session_state.pop('auth_token', None)
+st.title('Google 登录示例')
 
+if 'auth_token' not in st.session_state:
+    # 创建OAuth会话并生成授权URL
+    oauth_session = create_oauth_session()
+    authorize_url, state = oauth_session.create_authorization_url(AUTHORIZE_URL)
+    st.session_state['oauth_state'] = state
+    st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
+else:
+    # 使用OAuth令牌获取用户信息
+    oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
+    oauth_session.token = st.session_state['auth_token']
+    resp = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo')
+    if resp.ok:
+        user_info = resp.json()
+        st.write(f'Hi {user_info["name"]}!')
+    else:
+        st.error("Failed to fetch user details.")
 
+    if st.button('Logout'):
+        st.session_state.pop('auth_token', None)
