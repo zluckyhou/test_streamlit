@@ -1,31 +1,9 @@
-import json
-import os
-from urllib.parse import quote_plus, urlencode
-
 import streamlit as st
-from streamlit_oauth import OAuth2Component
-import base64
-import logging
+from authlib.integrations.starlette_client import OAuth
+import os
 
 
 
-# set logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# clear logger if exists
-if logger.hasHandlers():
-    logger.handlers.clear()
-
-# create a console logger
-console_handler = logging.StreamHandler()
-console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
-logger.addHandler(console_handler)
-
-
-
-# create an OAuth2Component instance
 CLIENT_ID = st.secrets["client_id"]  # Google Client ID
 CLIENT_SECRET = st.secrets["client_secret"]  # Google Client Secret
 AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -33,71 +11,49 @@ TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 REDIRECT_URL = st.secrets["redirect_url"]
 
-with st.sidebar:
-	st.markdown("# Test login")
-	# login module
-	if "auth" not in st.session_state:
-		# create a button to start the OAuth2 flow
-		oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_ENDPOINT, TOKEN_ENDPOINT, TOKEN_ENDPOINT, REVOKE_ENDPOINT)
-		result = oauth2.authorize_button(
-			name="Continue with Google",
-			icon="https://www.google.com.tw/favicon.ico",
-			redirect_uri=REDIRECT_URL,
-			scope="openid email profile",
-			key="google",
-			extras_params={"prompt": "consent", "access_type": "offline"},
-			use_container_width=True,
-			pkce='S256',
-		)
-	
-		
-		if result:
-			# Customize the button using the injected CSS class
-			# CSS for Google login button
-			logger.info(f"oauth result: {result}")
-			google_button_css = """
-				background-color: #4285f4;
-				color: white;
-				border: none;
-				border-radius: 4px;
-				padding: 8px 20px;
-				font-family: Roboto, sans-serif;
-				font-size: 14px;
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-				cursor: pointer;
-				display: flex;
-				align-items: center;
-				text-decoration: none;
-			""".replace("\n", " ") 
-			
-			# st.markdown(f"""
-			# 	<a href="{result}">
-			# 		<img src="https://www.google.com.tw/favicon.ico">
-			# 		Continue with Google
-			# 	</a>
-			# """, unsafe_allow_html=True)
-			st.write(result)
-	
-			# decode the id_token jwt and get the user's email address
-			id_token = result["token"]["id_token"]
-			# verify the signature is an optional step for security
-			payload = id_token.split(".")[1]
-			# add padding to the payload if needed
-			payload += "=" * (-len(payload) % 4)
-			payload = json.loads(base64.b64decode(payload))
-			name = payload["name"]
-			email = payload["email"]
-			st.session_state["user_profile"] = payload
-			logger.info(f"user profile: {payload}")
-			st.session_state["name"] = name
-			st.session_state["auth"] = email
-			st.session_state["token"] = result["token"]
-			st.rerun()									
-	else:
-		st.write(f"Welcome {st.session_state['name']}")
-		# st.write(st.session_state["auth"])
-		# st.write(st.session_state["token"])
-		if st.button("Logout"):
-			del st.session_state["auth"]
-			del st.session_state["token"]
 
+
+# 初始化OAuth 2客户端
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=st.secrets["client_id"],  # 替换为你的Google客户端ID
+    client_secret=st.secrets["client_secret"],  # 替换为你的Google客户端密钥
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params=None,
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    client_kwargs={'scope': 'openid profile email'},
+)
+
+# Streamlit页面布局
+def main():
+    st.title('Google 登录示例')
+
+    # 显示登录按钮
+    if 'auth_token' not in st.session_state:
+        authorize_url, state = oauth.google.authorize_redirect(
+            redirect_uri='http://localhost:8501'
+        )
+        st.session_state['oauth_state'] = state
+        st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
+    else:
+        # 访问受保护的资源
+        resp = oauth.google.get('userinfo', token=st.session_state['auth_token'])
+        user_info = resp.json()
+        st.write(f'Hi {user_info["name"]}!')
+
+        if st.button('Logout'):
+            st.session_state.pop('auth_token', None)
+
+# 处理OAuth回调
+def auth_callback():
+    token = oauth.google.authorize_access_token()
+    st.session_state['auth_token'] = token
+
+# 设置Streamlit页面配置
+if __name__ == "__main__":
+    if 'oauth_state' in st.experimental_get_query_params():
+        auth_callback()
+    main()
