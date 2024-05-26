@@ -1,46 +1,41 @@
 import streamlit as st
-from authlib.integrations.starlette_client import OAuth
+from authlib.integrations.requests_client import OAuth2Session
 import os
 
-
-
+# Google OAuth 配置
 CLIENT_ID = st.secrets["client_id"]  # Google Client ID
 CLIENT_SECRET = st.secrets["client_secret"]  # Google Client Secret
-AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
-TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
-REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
-REDIRECT_URL = st.secrets["redirect_url"]
+AUTHORIZE_URL = 'https://accounts.google.com/o/oauth2/auth'
+TOKEN_URL = 'https://oauth2.googleapis.com/token'
+REDIRECT_URI = st.secrets["redirect_url"]  # 确保这与你在Google Cloud Platform中设置的相匹配
 
+# 创建OAuth2会话对象
+def create_oauth_session(state=None):
+    return OAuth2Session(
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        authorization_endpoint=AUTHORIZE_URL,
+        token_endpoint=TOKEN_URL,
+        redirect_uri=REDIRECT_URI,
+        scope='openid email profile',
+        state=state
+    )
 
-
-# 初始化OAuth 2客户端
-oauth = OAuth()
-oauth.register(
-    name='google',
-    client_id=st.secrets["client_id"],  # 替换为你的Google客户端ID
-    client_secret=st.secrets["client_secret"],  # 替换为你的Google客户端密钥
-    access_token_url='https://accounts.google.com/o/oauth2/token',
-    access_token_params=None,
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
-    authorize_params=None,
-    api_base_url='https://www.googleapis.com/oauth2/v1/',
-    client_kwargs={'scope': 'openid profile email'},
-)
-
-# Streamlit页面布局
+# Streamlit应用主逻辑
 def main():
     st.title('Google 登录示例')
 
-    # 显示登录按钮
     if 'auth_token' not in st.session_state:
-        authorize_url, state = oauth.google.authorize_redirect(
-            redirect_uri='http://localhost:8501'
-        )
+        # 创建OAuth会话并生成授权URL
+        oauth_session = create_oauth_session()
+        authorize_url, state = oauth_session.create_authorization_url(AUTHORIZE_URL)
         st.session_state['oauth_state'] = state
         st.markdown(f'<a href="{authorize_url}" target="_self">使用Google登录</a>', unsafe_allow_html=True)
     else:
-        # 访问受保护的资源
-        resp = oauth.google.get('userinfo', token=st.session_state['auth_token'])
+        # 使用OAuth令牌获取用户信息
+        oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
+        oauth_session.token = st.session_state['auth_token']
+        resp = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo')
         user_info = resp.json()
         st.write(f'Hi {user_info["name"]}!')
 
@@ -49,11 +44,15 @@ def main():
 
 # 处理OAuth回调
 def auth_callback():
-    token = oauth.google.authorize_access_token()
-    st.session_state['auth_token'] = token
+    if 'code' in st.experimental_get_query_params():
+        oauth_session = create_oauth_session(state=st.session_state['oauth_state'])
+        code = st.experimental_get_query_params()['code'][0]
+        token = oauth_session.fetch_token(TOKEN_URL, code=code, include_client_id=True)
+        st.session_state['auth_token'] = token
 
 # 设置Streamlit页面配置
 if __name__ == "__main__":
-    if 'oauth_state' in st.experimental_get_query_params():
+    if 'code' in st.experimental_get_query_params():
         auth_callback()
     main()
+
