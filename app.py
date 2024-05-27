@@ -13,3 +13,4 @@ prompt = st.chat_input("What's up?")
 
 if prompt:
 	st.warning('This is a warning', icon="⚠️")
+	st.markdown("After warning text")
