@@ -13,6 +13,7 @@ prompt = st.chat_input("What's up?")
 
 if prompt:
 	with st.chat_message("assistant"):
-		st.warning('This is a warning', icon="⚠️")
+		st.warning('This is a warning', icon=":material/passkey:")
+		
 		st.error('This is an error', icon="🚨")
 		st.markdown("After warning text")
