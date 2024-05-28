@@ -8,7 +8,7 @@ with st.sidebar:
 
 st.title("This is title")
 
-st.markdown("""
+st.html("""
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script>
   kofiWidgetOverlay.draw('chatgpt4o', {
