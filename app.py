@@ -19,3 +19,21 @@ if prompt:
 		
 		st.error('This is an error', icon="🚨")
 		st.markdown("After warning text")
+
+
+import subprocess
+import os
+
+# 启动 FastAPI 应用
+subprocess.Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"])
+
+# Streamlit 应用
+st.title("Ko-fi to Discord Webhook Integration")
+st.write("This app is configured to receive Ko-fi webhooks and send notifications to a Discord channel.")
+
+st.markdown("## Setup Instructions")
+st.markdown("""
+1. Set the Discord Webhook URL in your environment variables as `DISCORD_WEBHOOK_URL`.
+2. Configure Ko-fi to send webhooks to `https://your-streamlit-app-url.streamlitapp.com/webhook`.
+3. Ensure your Streamlit app is running and accessible via HTTPS.
+""")
