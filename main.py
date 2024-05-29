@@ -2,10 +2,11 @@ from fastapi import FastAPI, Request
 import json
 import requests
 import os
+import streamlit as st
 
 app = FastAPI()
 
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+DISCORD_WEBHOOK_URL = st.secrets["DISCORD_WEBHOOK_URL"]
 
 @app.post("/webhook")
 async def webhook(request: Request):
