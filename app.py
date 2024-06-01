@@ -18,6 +18,8 @@ st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/objec
 
 st.link_button(":red-background[Support me on ko-fi]","https://ko-fi.com/J3J3YMOKZ")
 
+st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o-files/kofi_button_red_1.png)](https://ko-fi.com/J3J3YMOKZ)")
+
 prompt = st.chat_input("What's up?")
 
 if prompt:
