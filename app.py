@@ -14,6 +14,7 @@ st.write(f"Your option: {option}")
 
 st.markdown("[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J3YMOKZ)")
 
+st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o-files/kofi_button_red.png)](https://ko-fi.com/J3J3YMOKZ)")
 
 prompt = st.chat_input("What's up?")
 
