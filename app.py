@@ -29,3 +29,13 @@ if prompt:
 		st.error('This is an error', icon="🚨")
 		st.markdown("After warning text")
 		
+
+video_placeholder = st.empty()
+
+with video_placeholder:
+	st.markdown("test video placeholder")
+
+if st.button('test placeholder'):
+	with video_placeholder:
+		st.markdown("video placeholder changed!")
+
