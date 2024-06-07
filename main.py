@@ -63,3 +63,4 @@ def record_and_display():
 				f.write(st.session_state.record_audio_data)		
 		st.session_state.audio_file = output_file_path
 
+record_and_display()
