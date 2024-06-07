@@ -22,22 +22,22 @@ st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/objec
 
 prompt = st.chat_input("What's up?")
 
-if prompt:
-	with st.chat_message("assistant"):
-		st.warning('This is a warning', icon=":material/passkey:")
+# if prompt:
+# 	with st.chat_message("assistant"):
+# 		st.warning('This is a warning', icon=":material/passkey:")
 		
-		st.error('This is an error', icon="🚨")
-		st.markdown("After warning text")
+# 		st.error('This is an error', icon="🚨")
+# 		st.markdown("After warning text")
 		
 
-video_placeholder = st.empty()
+# video_placeholder = st.empty()
 
-with video_placeholder:
-	st.markdown("test video placeholder")
+# with video_placeholder:
+# 	st.markdown("test video placeholder")
 
-if st.button('test placeholder'):
-	with video_placeholder:
-		st.markdown("video placeholder changed!")
+# if st.button('test placeholder'):
+# 	with video_placeholder:
+# 		st.markdown("video placeholder changed!")
 
 
 
