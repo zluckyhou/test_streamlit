@@ -3,3 +3,4 @@ supabase
 pillow
 authlib
 streamlit_oauth
+streamlit-audiorec
