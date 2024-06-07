@@ -55,13 +55,13 @@ def record_and_display():
 		output_file_path = os.path.join(output_path,"record_audio.mp3")
 		
 
-		st.markdown(f"wav_audio_data: {wav_audio_data}")
-
 		if wav_audio_data is not None:
+			st.markdown(f"wav_audio_data: {wav_audio_data}")
+
 			st.audio(wav_audio_data, format='audio/wav')
-			st.session_state.record_audio_data = wav_audio_data
 			with open(output_file_path,'wb') as f:
-				f.write(st.session_state.record_audio_data)		
-		st.session_state.audio_file = output_file_path
+				f.write(wav_audio_data)
+			st.markdown(output_file_path)
+			st.audio(output_file_path)
 
 record_and_display()
