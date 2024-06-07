@@ -43,25 +43,30 @@ prompt = st.chat_input("What's up?")
 import subprocess
 from st_audiorec import st_audiorec
 import os
-def record_and_display():
-	with st.container(border=True):
-		wav_audio_data = st_audiorec()
+# def record_and_display():
+# 	with st.container(border=True):
+# 		wav_audio_data = st_audiorec()
 
-		output_path = 'record_audios'
-		# remove directory if exists 
-		rm_user_directory = subprocess.run(["rm","-rf",output_path],check=True)
-		mkdir_user_directory = subprocess.run(["mkdir","-p",output_path],check=True)
+# 		output_path = 'record_audios'
+# 		# remove directory if exists 
+# 		rm_user_directory = subprocess.run(["rm","-rf",output_path],check=True)
+# 		mkdir_user_directory = subprocess.run(["mkdir","-p",output_path],check=True)
 
-		output_file_path = os.path.join(output_path,"record_audio.mp3")
+# 		output_file_path = os.path.join(output_path,"record_audio.mp3")
 		
 
-		if wav_audio_data is not None:
-			st.markdown(f"wav_audio_data: {wav_audio_data}")
+# 		if wav_audio_data is not None:
+# 			st.markdown(f"wav_audio_data: {wav_audio_data}")
 
-			st.audio(wav_audio_data, format='audio/wav')
-			with open(output_file_path,'wb') as f:
-				f.write(wav_audio_data)
-			st.markdown(output_file_path)
-			st.audio(output_file_path)
+# 			st.audio(wav_audio_data, format='audio/wav')
+# 			with open(output_file_path,'wb') as f:
+# 				f.write(wav_audio_data)
+# 			st.markdown(output_file_path)
+# 			st.audio(output_file_path)
 
-record_and_display()
+wav_audio_data = st_audiorec()
+
+if wav_audio_data is not None:
+	st.markdown(f"wav_audio_data: {wav_audio_data}")
+
+	st.audio(wav_audio_data, format='audio/wav')
