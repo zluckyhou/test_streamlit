@@ -42,6 +42,7 @@ prompt = st.chat_input("What's up?")
 
 import subprocess
 from st_audiorec import st_audiorec
+import os
 def record_and_display():
 	with st.container(border=True):
 		wav_audio_data = st_audiorec()
