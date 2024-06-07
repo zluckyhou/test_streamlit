@@ -40,7 +40,7 @@ prompt = st.chat_input("What's up?")
 # 		st.markdown("video placeholder changed!")
 
 
-
+import subprocess
 from st_audiorec import st_audiorec
 def record_and_display():
 	with st.container(border=True):
