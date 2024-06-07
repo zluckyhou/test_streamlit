@@ -22,20 +22,45 @@ st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/objec
 
 prompt = st.chat_input("What's up?")
 
-if prompt:
-	with st.chat_message("assistant"):
-		st.warning('This is a warning', icon=":material/passkey:")
+# if prompt:
+# 	with st.chat_message("assistant"):
+# 		st.warning('This is a warning', icon=":material/passkey:")
 		
-		st.error('This is an error', icon="🚨")
-		st.markdown("After warning text")
+# 		st.error('This is an error', icon="🚨")
+# 		st.markdown("After warning text")
 		
 
-video_placeholder = st.empty()
+# video_placeholder = st.empty()
 
-with video_placeholder:
-	st.markdown("test video placeholder")
+# with video_placeholder:
+# 	st.markdown("test video placeholder")
 
-if st.button('test placeholder'):
-	with video_placeholder:
-		st.markdown("video placeholder changed!")
+# if st.button('test placeholder'):
+# 	with video_placeholder:
+# 		st.markdown("video placeholder changed!")
 
+
+
+from st_audiorec import st_audiorec
+def record_and_display():
+	with st.container(border=True):
+		wav_audio_data = st_audiorec()
+
+		output_path = 'record_audios'
+		# remove directory if exists 
+		rm_user_directory = subprocess.run(["rm","-rf",output_path],check=True)
+		mkdir_user_directory = subprocess.run(["mkdir","-p",output_path],check=True)
+
+		output_file_path = os.path.join(output_path,"record_audio.mp3")
+		
+
+		st.markdown(f"wav_audio_data: {wav_audio_data}")
+
+		if wav_audio_data is not None:
+			st.audio(wav_audio_data, format='audio/wav')
+			st.session_state.record_audio_data = wav_audio_data
+			with open(output_file_path,'wb') as f:
+				f.write(st.session_state.record_audio_data)		
+		st.session_state.audio_file = output_file_path
+
+record_and_display()
