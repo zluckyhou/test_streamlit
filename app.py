@@ -1,5 +1,6 @@
 import streamlit as st
-
+import os
+from pytube import YouTube
 
 with st.sidebar:
 	st.markdown("# test sidebar layout")
@@ -12,58 +13,39 @@ with st.sidebar:
 st.title("This is title")
 st.write(f"Your option: {option}")
 
-st.markdown("[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J3YMOKZ)")
 
-st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o-files/kofi_button_red.png)](https://ko-fi.com/J3J3YMOKZ)")
-
-st.link_button(":red-background[Support me on ko-fi]","https://ko-fi.com/J3J3YMOKZ")
-
-st.markdown("[![ko-fi](https://wbucijybungpjrszikln.supabase.co/storage/v1/object/public/chatgpt-4o-files/kofi_button_red_1.png)](https://ko-fi.com/J3J3YMOKZ)")
-
-prompt = st.chat_input("What's up?")
-
-# if prompt:
-# 	with st.chat_message("assistant"):
-# 		st.warning('This is a warning', icon=":material/passkey:")
-		
-# 		st.error('This is an error', icon="🚨")
-# 		st.markdown("After warning text")
-		
-
-# video_placeholder = st.empty()
-
-# with video_placeholder:
-# 	st.markdown("test video placeholder")
-
-# if st.button('test placeholder'):
-# 	with video_placeholder:
-# 		st.markdown("video placeholder changed!")
+youtube_url = st.text_area(label="input youtube url")
 
 
-import subprocess
-from st_audiorec import st_audiorec
-import os
-# def record_and_display():
-# 	with st.container(border=True):
-# 		wav_audio_data = st_audiorec()
+download_button = st.button("Download video")
 
-# 		output_path = 'record_audios'
-# 		# remove directory if exists 
-# 		rm_user_directory = subprocess.run(["rm","-rf",output_path],check=True)
-# 		mkdir_user_directory = subprocess.run(["mkdir","-p",output_path],check=True)
 
-# 		output_file_path = os.path.join(output_path,"record_audio.mp3")
-		
+def progress_function(stream, chunk, bytes_remaining):
+    total_size = stream.filesize
+    bytes_downloaded = total_size - bytes_remaining
+    percentage_of_completion = bytes_downloaded / total_size * 100
+    print(f"Downloaded {percentage_of_completion}%")
 
-# 		if wav_audio_data is not None:
-# 			st.markdown(f"wav_audio_data: {wav_audio_data}")
+def youtube_download(video_url):
+    yt = YouTube(video_url, on_progress_callback=progress_function)
 
-# 			st.audio(wav_audio_data, format='audio/wav')
-# 			with open(output_file_path,'wb') as f:
-# 				f.write(wav_audio_data)
-# 			st.markdown(output_file_path)
-# 			st.audio(output_file_path)
+    # 获取视频标题
+    video_title = yt.title
+    print(f"Downloading video: {video_title}")
 
-wav_audio_data = st_audiorec()
+    stream = yt.streams.get_highest_resolution()
+    # 获取视频流的默认文件名
+    default_filename = stream.default_filename.replace(' ','_')
 
-st.markdown(f"wav_audio_data: {wav_audio_data}")
+    stream.download(filename=default_filename)
+
+    return default_filename
+
+
+
+if youtube_url:
+	if download_button:
+		youtube_video = youtube_download(youtube_url)
+		st.video(youtube_video)
+else:
+	st.warning('input youtube url first!')
