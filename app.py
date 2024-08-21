@@ -14,12 +14,23 @@ GA_JS = """
 </script>
 """
 
+
 def inject_ga():
     index_path = os.path.join(os.path.dirname(st.__file__), 'static', 'index.html')
 
-    # Use `sed` command to inject the GA_JS code into the index.html file
-    subprocess.run(['sed', '-i', r"s/<head>/<head>\n{}/".format(GA_JS), index_path], check=True)
+    try:
+        with open(index_path, 'r') as f:
+            html = f.read()
+    except FileNotFoundError:
+        print("index.html not found")
+        return
 
+    if '<head>' in html:
+        new_html = html.replace('<head>', '<head>\n' + GA_JS)
+        with open(index_path, 'w') as f:
+            f.write(new_html)
+    else:
+        print("Could not find '<head>' tag in index.html")
 
 inject_ga()
 
