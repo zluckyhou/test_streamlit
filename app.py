@@ -1,6 +1,28 @@
 import streamlit as st
 import os
 from pytube import YouTube
+import subprocess
+
+GA_JS = """
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXX');
+</script>
+"""
+
+def inject_ga():
+    index_path = os.path.join(os.path.dirname(st.__file__), 'static', 'index.html')
+
+    # Use `sed` command to inject the GA_JS code into the index.html file
+    subprocess.run(['sed', '-i', r"s/<head>/<head>\n{}/".format(GA_JS), index_path], check=True)
+
+
+inject_ga()
+
 
 
 index_path = os.path.join(os.path.dirname(st.__file__), 'static','index.html')
@@ -13,6 +35,10 @@ st.write(index_content)
 
 file_path = os.path.dirname(st.__file__)
 st.markdown(f"file path: {file_path}")
+
+
+
+
 
 
 with st.sidebar:
