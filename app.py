@@ -34,7 +34,12 @@ def inject_ga():
 
 inject_ga()
 
+pwd = os.getcwd()
+st.markdown(f"current directory: {pwd}")
+file_ls = os.listdir(pwd)
+st.markdown(file_ls)
 
+st.divider()
 
 index_path = os.path.join(os.path.dirname(st.__file__), 'static','index.html')
 with open(index_path) as f:
