@@ -32,7 +32,7 @@ def inject_ga():
     else:
         print("Could not find '<head>' tag in index.html")
 
-inject_ga()
+# inject_ga()
 
 pwd = os.getcwd()
 st.markdown(f"current directory: {pwd}")
