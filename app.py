@@ -3,6 +3,13 @@ import os
 from pytube import YouTube
 
 
+index_path = os.path.join(os.path.dirname(st.__file__), 'static','index.html')
+with open(index_path) as f:
+	index_content = f.read()
+	
+st.markdown('index.html content')
+st.write(index_content)
+
 
 file_path = os.path.dirname(st.__file__)
 st.markdown(f"file path: {file_path}")
