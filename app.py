@@ -3,6 +3,24 @@ import os
 from pytube import YouTube
 import subprocess
 
+
+# google search console
+import streamlit.components.v1 as components
+
+# Google Search Console meta tag
+meta_tag = """
+<meta name="google-site-verification" content="Jx6xcnM94d_X3BGDU6XRoj57kX4QffVAaMdsRr1u0qQ" />
+"""
+
+# Insert meta tag into the head of the page
+components.html(f"""
+<head>
+    {meta_tag}
+</head>
+""", height=0)
+
+
+
 GA_JS = """
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXX"></script>
