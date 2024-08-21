@@ -2,6 +2,12 @@ import streamlit as st
 import os
 from pytube import YouTube
 
+
+
+file_path = os.path.dirname(st.__file__)
+st.markdown(f"file path: {file_path}")
+
+
 with st.sidebar:
 	st.markdown("# test sidebar layout")
 	option = st.selectbox(
